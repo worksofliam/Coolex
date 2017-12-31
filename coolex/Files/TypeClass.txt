@@ -1,0 +1,11 @@
+﻿    class CoolexType
+    {
+        public CoolexLex.Type Type;
+        public string Value;
+
+        public CoolexType(CoolexLex.Type type, string value)
+        {
+            Type = type;
+            Value = value;
+        }
+    }

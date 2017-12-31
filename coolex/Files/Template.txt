@@ -1,0 +1,94 @@
+﻿        public List<CoolexType> TokenList = new List<CoolexType>();
+
+        private Boolean InString = false;
+        private string token = "";
+        private int cIndex = 0;
+        private bool IsOperator = false;
+        public void Lex(string Text)
+        {
+            while (cIndex < Text.Length)
+            {
+                IsOperator = false;
+                if (InString == false)
+                {
+                    foreach (string Operator in OPERATORS)
+                    {
+					    if (cIndex + Operator.Length > Text.Length) continue;
+                        if (Text.Substring(cIndex, Operator.Length) == Operator)
+                        {
+                            //Sort the old token before adding the operator
+                            WorkToken();
+
+                            token = Text.Substring(cIndex, Operator.Length);
+                            WorkToken();
+                            cIndex += Operator.Length;
+                            IsOperator = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (IsOperator == false)
+                {
+                    char c = Text.Substring(cIndex, 1).ToCharArray()[0];
+
+                    if (STRING_LITERAL.Contains(c))
+                    {
+                        if (Text.Substring(cIndex - 1, 1) == "\\")
+                            token += c;
+                        else
+                        {
+                            WorkToken(InString);
+                            InString = !InString;
+                        }
+                    }
+                    else
+                        token += c;
+                    
+                    
+                    cIndex++;
+                }
+            }
+
+            WorkToken();
+        }
+
+        public void WorkToken(Boolean stringToken = false)
+        {
+            string piece = token;
+            token = "";
+
+            if (piece != "")
+            {
+                if (stringToken == false)
+                {
+                    foreach (var Piece in Pieces)
+                    {
+                        foreach (string Value in Piece.Value)
+                        {
+                            if (Value.Length > 1 && Value.StartsWith("/") && Value.EndsWith("/") && !OPERATORS.Contains(piece))
+                            {
+                                if (System.Text.RegularExpressions.Regex.IsMatch(piece, Value.Trim('/')))
+                                {
+                                    TokenList.Add(new CoolexType(Piece.Key, piece));
+                                    return;
+                                }
+                            }
+                            else
+                            {
+                                if (Value == piece)
+                                {
+                                    TokenList.Add(new CoolexType(Piece.Key, piece));
+                                    return;
+                                }
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    TokenList.Add(new CoolexType(Type.STRING_LITERAL, piece));
+                }
+            }
+            
+        }
