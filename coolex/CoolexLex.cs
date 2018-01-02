@@ -51,7 +51,8 @@ namespace coolex
             { Type.MULTIPLY, new[] { "*" } },
         };
 
-        public CoolexType TokenList = new CoolexType(Type.BLOCK, "");
+        private CoolexType TokenList = new CoolexType(Type.BLOCK, "");
+        public List<CoolexType> GetTokens() => TokenList.Block;
 
         private Boolean InString = false;
         private string token = "";
