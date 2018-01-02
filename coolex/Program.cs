@@ -34,8 +34,6 @@ namespace coolex
 
             }
             printIndex--;
-
-
         }
     }
 

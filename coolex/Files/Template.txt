@@ -1,6 +1,27 @@
-﻿        private CoolexType TokenList = new CoolexType(Type.BLOCK, "");
+﻿        
+
+		//***************************************************
+		private CoolexType TokenList = new CoolexType(Type.BLOCK, "");
 		public List<CoolexType> GetTokens() => TokenList.Block;
 
+		//***************************************************
+        private int printIndex = -1;
+        public void PrintBlock(List<CoolexType> Block)
+        {
+            printIndex++;
+            foreach (CoolexType Token in Block)
+            {
+                Console.WriteLine("".PadRight(printIndex, '\t') + Token.Type.ToString() + " " + Token.Value);
+
+                if (Token.Block != null)
+                    PrintBlock(Token.Block);
+
+            }
+            printIndex--;
+        }
+		
+
+		//***************************************************
         private Boolean InString = false;
         private string token = "";
         private int cIndex = 0;
