@@ -1,5 +1,6 @@
 ﻿    class CoolexType
     {
+        public List<CoolexType> Block;
         public CoolexLex.Type Type;
         public string Value;
 
@@ -7,5 +8,6 @@
         {
             Type = type;
             Value = value;
+            Block = null;
         }
     }

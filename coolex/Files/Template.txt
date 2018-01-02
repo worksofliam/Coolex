@@ -1,4 +1,4 @@
-﻿        public List<CoolexType> TokenList = new List<CoolexType>();
+﻿public CoolexType TokenList = new CoolexType(Type.BLOCK, "");
 
         private Boolean InString = false;
         private string token = "";
@@ -6,6 +6,7 @@
         private bool IsOperator = false;
         public void Lex(string Text)
         {
+            TokenList.Block = new List<CoolexType>();
             while (cIndex < Text.Length)
             {
                 IsOperator = false;
@@ -13,14 +14,16 @@
                 {
                     foreach (string Operator in OPERATORS)
                     {
-					    if (cIndex + Operator.Length > Text.Length) continue;
+                        if (cIndex + Operator.Length > Text.Length) continue;
                         if (Text.Substring(cIndex, Operator.Length) == Operator)
                         {
                             //Sort the old token before adding the operator
                             WorkToken();
 
+                            //Insert new token (operator token)
                             token = Text.Substring(cIndex, Operator.Length);
                             WorkToken();
+
                             cIndex += Operator.Length;
                             IsOperator = true;
                             break;
@@ -38,19 +41,41 @@
                             token += c;
                         else
                         {
+                            //This means it's end of STRING_LITERAL, and must be added to token list
                             WorkToken(InString);
                             InString = !InString;
                         }
                     }
                     else
                         token += c;
-                    
-                    
+
+
                     cIndex++;
                 }
             }
 
             WorkToken();
+        }
+
+        private int BlockIndex = 0;
+        private List<CoolexType> GetLastToken(int Direction = 0)
+        {
+            List<CoolexType> Result = TokenList.Block;
+
+            BlockIndex += Direction;
+
+            for (int levels = 0; levels < BlockIndex; levels++)
+            {
+                if (Result.Count() > 0)
+                {
+                    if (Result[Result.Count - 1].Block == null)
+                        Result[Result.Count - 1].Block = new List<CoolexType>();
+
+                    Result = Result[Result.Count - 1].Block;
+                }
+            }
+            
+            return Result;
         }
 
         public void WorkToken(Boolean stringToken = false)
@@ -70,7 +95,7 @@
                             {
                                 if (System.Text.RegularExpressions.Regex.IsMatch(piece, Value.Trim('/')))
                                 {
-                                    TokenList.Add(new CoolexType(Piece.Key, piece));
+                                    GetLastToken().Add(new CoolexType(Piece.Key, piece));
                                     return;
                                 }
                             }
@@ -78,7 +103,18 @@
                             {
                                 if (Value == piece)
                                 {
-                                    TokenList.Add(new CoolexType(Piece.Key, piece));
+                                    if (BLOCK_OPEN.Contains(piece))
+                                    {
+                                        GetLastToken(1);
+                                    }
+                                    else if (BLOCK_CLOSE.Contains(piece))
+                                    {
+                                        GetLastToken(-1);
+                                    }
+                                    else
+                                    {
+                                        GetLastToken().Add(new CoolexType(Piece.Key, piece));
+                                    }
                                     return;
                                 }
                             }
@@ -87,8 +123,8 @@
                 }
                 else
                 {
-                    TokenList.Add(new CoolexType(Type.STRING_LITERAL, piece));
+                    GetLastToken().Add(new CoolexType(Type.STRING_LITERAL, piece));
                 }
             }
-            
+
         }

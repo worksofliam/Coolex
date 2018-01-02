@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace coolex
 {
     class CoolexType
     {
+        public List<CoolexType> Block;
         public CoolexLex.Type Type;
         public string Value;
 
@@ -16,6 +15,7 @@ namespace coolex
         {
             Type = type;
             Value = value;
+            Block = null;
         }
     }
 
@@ -23,6 +23,7 @@ namespace coolex
     {
         public enum Type
         {
+            BLOCK,
             UNKNOWN,
             OPERATOR,
             STRING_LITERAL,
@@ -34,11 +35,15 @@ namespace coolex
             MULTIPLY
         }
 
-        private string[] OPERATORS = new[] { "+", "-", "/", "*", " " };
+        private string[] OPERATORS = new[] { "+", "-", "/", "*", "{", "}", " " };
         private char[] STRING_LITERAL = new[] { '"', '\'' };
+
+        private string[] BLOCK_OPEN = new[] { "{" };
+        private string[] BLOCK_CLOSE = new[] { "}" };
 
         private Dictionary<Type, string[]> Pieces = new Dictionary<Type, string[]>
         {
+            { Type.BLOCK, new[] { "{", "}" } },
             { Type.NUMERIC_LITERAL, new[] { "/[-0-9]+/" } },
             { Type.PLUS, new[] { "+" } },
             { Type.MINUS, new[] { "-" } },
@@ -46,7 +51,7 @@ namespace coolex
             { Type.MULTIPLY, new[] { "*" } },
         };
 
-        public List<CoolexType> TokenList = new List<CoolexType>();
+        public CoolexType TokenList = new CoolexType(Type.BLOCK, "");
 
         private Boolean InString = false;
         private string token = "";
@@ -54,6 +59,7 @@ namespace coolex
         private bool IsOperator = false;
         public void Lex(string Text)
         {
+            TokenList.Block = new List<CoolexType>();
             while (cIndex < Text.Length)
             {
                 IsOperator = false;
@@ -61,13 +67,16 @@ namespace coolex
                 {
                     foreach (string Operator in OPERATORS)
                     {
+                        if (cIndex + Operator.Length > Text.Length) continue;
                         if (Text.Substring(cIndex, Operator.Length) == Operator)
                         {
                             //Sort the old token before adding the operator
                             WorkToken();
 
+                            //Insert new token (operator token)
                             token = Text.Substring(cIndex, Operator.Length);
                             WorkToken();
+
                             cIndex += Operator.Length;
                             IsOperator = true;
                             break;
@@ -85,6 +94,7 @@ namespace coolex
                             token += c;
                         else
                         {
+                            //This means it's end of STRING_LITERAL, and must be added to token list
                             WorkToken(InString);
                             InString = !InString;
                         }
@@ -98,6 +108,27 @@ namespace coolex
             }
 
             WorkToken();
+        }
+
+        private int BlockIndex = 0;
+        private List<CoolexType> GetLastToken(int Direction = 0)
+        {
+            List<CoolexType> Result = TokenList.Block;
+
+            BlockIndex += Direction;
+
+            for (int levels = 0; levels < BlockIndex; levels++)
+            {
+                if (Result.Count() > 0)
+                {
+                    if (Result[Result.Count - 1].Block == null)
+                        Result[Result.Count - 1].Block = new List<CoolexType>();
+
+                    Result = Result[Result.Count - 1].Block;
+                }
+            }
+            
+            return Result;
         }
 
         public void WorkToken(Boolean stringToken = false)
@@ -115,9 +146,9 @@ namespace coolex
                         {
                             if (Value.Length > 1 && Value.StartsWith("/") && Value.EndsWith("/") && !OPERATORS.Contains(piece))
                             {
-                                if (Regex.IsMatch(piece, Value.Trim('/')))
+                                if (System.Text.RegularExpressions.Regex.IsMatch(piece, Value.Trim('/')))
                                 {
-                                    TokenList.Add(new CoolexType(Piece.Key, piece));
+                                    GetLastToken().Add(new CoolexType(Piece.Key, piece));
                                     return;
                                 }
                             }
@@ -125,7 +156,18 @@ namespace coolex
                             {
                                 if (Value == piece)
                                 {
-                                    TokenList.Add(new CoolexType(Piece.Key, piece));
+                                    if (BLOCK_OPEN.Contains(piece))
+                                    {
+                                        GetLastToken(1);
+                                    }
+                                    else if (BLOCK_CLOSE.Contains(piece))
+                                    {
+                                        GetLastToken(-1);
+                                    }
+                                    else
+                                    {
+                                        GetLastToken().Add(new CoolexType(Piece.Key, piece));
+                                    }
                                     return;
                                 }
                             }
@@ -134,7 +176,7 @@ namespace coolex
                 }
                 else
                 {
-                    TokenList.Add(new CoolexType(Type.STRING_LITERAL, piece));
+                    GetLastToken().Add(new CoolexType(Type.STRING_LITERAL, piece));
                 }
             }
 

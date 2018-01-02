@@ -46,7 +46,7 @@ namespace coolex
         {
             List<string> TypeEnum = new List<string>();
             List<string> Pieces = new List<string>();
-            string operators = "", string_literal = "";
+            string operators = "", string_literal = "", block_open = "", block_close = "";
 
             //Grab operators
             if (!Config.ContainsKey("OPERATORS"))
@@ -62,12 +62,31 @@ namespace coolex
                 WriteMessage("Notice", "String constants found.");
             }
 
+            if (Config.ContainsKey("BLOCK_OPEN"))
+            {
+                WriteMessage("Notice", "Open blocks found.");
+                if (!Config.ContainsKey("BLOCK_CLOSE"))
+                    WriteMessage("Error", "BLOCK_CLOSE is missing, which is required with BLOCK_OPEN.");
+
+                block_open = Config["BLOCK_OPEN"];
+            }
+
+            if (Config.ContainsKey("BLOCK_CLOSE"))
+            {
+                WriteMessage("Notice", "Open blocks found.");
+                if (!Config.ContainsKey("BLOCK_OPEN"))
+                    WriteMessage("Error", "BLOCK_OPEN is missing, which is required with BLOCK_CLOSE.");
+
+                block_close = Config["BLOCK_CLOSE"];
+            }
+
             //Remove required configs so only user input appears
+            //We do not remove BLOCK_OPEN and BLOCK_CLOSE so the lexer sees it as a token
             Config.Remove("OPERATORS");
             Config.Remove("STRING_LITERAL");
 
             //Add default and user enums
-            TypeEnum.AddRange(new[] { "UNKNOWN", "OPERATOR", "STRING_LITERAL" });
+            TypeEnum.AddRange(new[] { "BLOCK", "UNKNOWN", "OPERATOR", "STRING_LITERAL" });
             TypeEnum.AddRange(Config.Keys);
 
             WriteMessage("Notice", "Generating enum Type:");
@@ -91,6 +110,18 @@ namespace coolex
                 Output.Add("private char[] STRING_LITERAL = new char[0];");
             else
                 Output.Add("private char[] STRING_LITERAL = new[] {" + string_literal + "};");
+
+            //Define BLOCK_OPEN
+            if (block_open == "")
+                Output.Add("private string[] BLOCK_OPEN = new string[0];");
+            else
+                Output.Add("private string[] BLOCK_OPEN = new[] {" + block_open + "};");
+
+            //Define BLOCK_CLOSE
+            if (block_open == "")
+                Output.Add("private string[] BLOCK_CLOSE = new string[0];");
+            else
+                Output.Add("private string[] BLOCK_CLOSE = new[] {" + block_close + "};");
 
             //Define user pieces
             Output.Add("private Dictionary<Type, string[]> Pieces = new Dictionary<Type, string[]>");
