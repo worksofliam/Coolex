@@ -73,7 +73,7 @@ namespace coolex
 
             if (Config.ContainsKey("BLOCK_CLOSE"))
             {
-                WriteMessage("Notice", "Open blocks found.");
+                WriteMessage("Notice", "Close blocks found.");
                 if (!Config.ContainsKey("BLOCK_OPEN"))
                     WriteMessage("Error", "BLOCK_OPEN is missing, which is required with BLOCK_CLOSE.");
 
