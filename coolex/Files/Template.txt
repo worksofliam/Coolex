@@ -1,7 +1,7 @@
 ﻿        
 
 		//***************************************************
-		private CoolexType TokenList = new CoolexType(Type.BLOCK, "");
+		private CoolexType TokenList = new CoolexType(Type.BLOCK, "", 0);
 		public List<CoolexType> GetTokens() => TokenList.Block;
 
 		//***************************************************
@@ -26,12 +26,19 @@
         private string token = "";
         private int cIndex = 0;
         private bool IsOperator = false;
+		private int CurrentLine = 1;
         public void Lex(string Text)
         {
             TokenList.Block = new List<CoolexType>();
             while (cIndex < Text.Length)
             {
                 IsOperator = false;
+
+				if (Text.Substring(cIndex, 1) == Environment.NewLine) {
+				    CurrentLine++;
+					continue;
+				}
+
                 if (InString == false)
                 {
                     foreach (string Operator in OPERATORS)
@@ -117,7 +124,7 @@
                             {
                                 if (System.Text.RegularExpressions.Regex.IsMatch(piece, Value.Trim('/')))
                                 {
-                                    GetLastToken().Add(new CoolexType(Piece.Key, piece));
+                                    GetLastToken().Add(new CoolexType(Piece.Key, piece, CurrentLine));
                                     return;
                                 }
                             }
@@ -135,7 +142,7 @@
                                     }
                                     else
                                     {
-                                        GetLastToken().Add(new CoolexType(Piece.Key, piece));
+                                        GetLastToken().Add(new CoolexType(Piece.Key, piece, CurrentLine));
                                     }
                                     return;
                                 }
@@ -145,7 +152,7 @@
                 }
                 else
                 {
-                    GetLastToken().Add(new CoolexType(Type.STRING_LITERAL, piece));
+                    GetLastToken().Add(new CoolexType(Type.STRING_LITERAL, piece, CurrentLine));
                 }
             }
 
