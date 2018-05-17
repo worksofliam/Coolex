@@ -26,7 +26,7 @@
         private string token = "";
         private int cIndex = 0;
         private bool IsOperator = false;
-		private int CurrentLine = 1;
+        private int CurrentLine = 1;
         public void Lex(string Text)
         {
             TokenList.Block = new List<CoolexType>();
@@ -34,10 +34,17 @@
             {
                 IsOperator = false;
 
-				if (Text.Substring(cIndex, 1) == Environment.NewLine) {
-				    CurrentLine++;
-					continue;
-				}
+                if (cIndex + 2 > Text.Length)
+                    { }
+                else
+                {
+                    if (Text.Substring(cIndex, 2) == Environment.NewLine)
+                    {
+                        CurrentLine++;
+                        cIndex += 2;
+                        continue;
+                    }
+                }
 
                 if (InString == false)
                 {
