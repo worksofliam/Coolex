@@ -13,3 +13,14 @@
             Block = null;
         }
     }
+
+	class ParseError 
+	{
+		public int Line;
+		public string Text;
+
+		public ParseError(int line, string text) {
+		  this.Line = line;
+		  this.Text = text;
+		}
+	}

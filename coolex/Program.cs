@@ -7,18 +7,27 @@ namespace coolex
     {
         static void Main(string[] args)
         {
-            /*CoolexLex lex = new CoolexLex();
+            string Definition = args[0];
+            string Structure = (args.Length > 1 ? args[1] : "");
 
-            lex.Lex("1 + 2 - 3 * 4 / { 5 + 5 } + 10 + {100 + {12 + 8}}");
+            //CoolexGenerator gen = new CoolexGenerator(Definition, Structure);
+            //gen.CreateOutput();
+            //gen.GenerateParser();
 
-            PrintBlock(lex.TokenList.Block);
+            CoolexLex lex = new CoolexLex();
 
-            Console.ReadLine();*/
+            lex.Lex("Dcl-S hello char(5); hello = 'hi' + 'world'; If abcd < 1244;");
 
-            string FileIn = String.Join(" ", args);
+            PrintBlock(lex.GetTokens());
 
-            CoolexGenerator gen = new CoolexGenerator(FileIn);
-            gen.CreateOutput();
+            Console.WriteLine("");
+
+            foreach (ParseError error in CoolexLex.Parse(lex.GetTokens().ToArray()))
+            {
+                Console.WriteLine("Error " + error.Line.ToString() + ": " + error.Text);
+            }
+            
+            Console.ReadLine();
         }
 
         private static int printIndex = -1;

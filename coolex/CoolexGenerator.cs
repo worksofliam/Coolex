@@ -9,17 +9,25 @@ namespace coolex
 {
     class CoolexGenerator
     {
-        private String FileIn;
+        private String Definition;
+        private String Structure;
         private List<string> Output = new List<string>();
         private Dictionary<string, string> Config = new Dictionary<string, string>();
 
-        public CoolexGenerator(string FileLoc)
+        public CoolexGenerator(string Definition, string Structure)
         {
-            FileIn = FileLoc;
+            this.Definition = Definition;
+            this.Structure = Structure;
             string[] data;
-            if (File.Exists(FileLoc))
+
+            if (File.Exists(Structure))
             {
-                foreach (string Line in File.ReadAllLines(FileLoc))
+                this.GenerateParser();
+            }
+
+            if (File.Exists(Definition))
+            {
+                foreach (string Line in File.ReadAllLines(Definition))
                 {
                     if (Line.Trim() == "") continue;
                     if (Line.StartsWith("#")) continue;
@@ -30,7 +38,7 @@ namespace coolex
             }
             else
             {
-                WriteMessage("Error", "File not found: " + FileLoc);
+                WriteMessage("Error", "File not found: " + Definition);
             }
         }
 
@@ -95,6 +103,12 @@ namespace coolex
                 WriteMessage("\t", EnumValue);
             }
 
+            Output.Add("using System;");
+            Output.Add("using System.Collections.Generic;");
+            Output.Add("using System.Linq;");
+            Output.Add("using System.Text.RegularExpressions;");
+
+            Output.Add("namespace coolex {");
             Output.Add("class CoolexLex {");
 
             //Write enum to output
@@ -133,13 +147,127 @@ namespace coolex
 
             Output.AddRange(Properties.Resources.Template.Split(new string[] { Environment.NewLine }, StringSplitOptions.None));
 
+            if (ParserOutput.Count > 0)
+                Output.AddRange(ParserOutput);
+
             Output.Add("}");
 
             Output.AddRange(Properties.Resources.TypeClass.Split(new string[] { Environment.NewLine }, StringSplitOptions.None));
 
-            string FileOut = FileIn + ".cs";
+            Output.Add("}");
+
+            string FileOut = Definition + ".cs";
             WriteMessage("Notice", "Writing file: " + FileOut);
             File.WriteAllLines(FileOut, Output);
+        }
+
+        private List<string> ParserOutput = new List<string>();
+        public void GenerateParser()
+        {
+            string[] Contents = File.ReadAllLines(this.Structure);
+
+            ParserOutput.Add("public static ParseError[] Parse(CoolexType[] tokens) {");
+            ParserOutput.Add("int inner; bool doBreak; List<ParseError> errors = new List<ParseError>();");
+            ParserOutput.Add("for (int i = 0; i < tokens.Length; i++) {");
+
+            foreach (string Line in Contents)
+            {
+                if (Line.Trim() == "") continue;
+                if (Line.StartsWith("#")) continue;
+                ParserOutput.Add(GenerateSwitch(Line.Split(','), 0, false));
+            }
+
+            ParserOutput.Add("}");
+
+            ParserOutput.Add("return errors.ToArray();");
+            ParserOutput.Add("}");
+        }
+
+        private string GenerateSwitch(string[] allParts, int partIndex, bool hasErrorHandle)
+        {
+            string part = allParts[partIndex].Trim();
+
+            bool isMany = false;
+            string lastPart = "";
+
+            if (part.StartsWith("[") && part.EndsWith("]"))
+            {
+                part = part.Trim('[', ']');
+                isMany = true;
+            }
+
+            string code = "";
+            bool isValue = (part.StartsWith("\""));
+            List<string> parts = part.Split('|').ToList();
+
+            if (hasErrorHandle)
+            {
+                code += "inner++;";
+            }
+            else
+            {
+                code += "inner = i;";
+            }
+
+            code += "if (inner < tokens.Length) {";
+
+            if (isMany)
+            {
+                lastPart = parts.Last();
+                parts.RemoveAt(parts.Count - 1);
+                code += "doBreak = false;";
+                code += "for (; inner < tokens.Length && doBreak == false; ) {";
+            }
+
+            code += "switch (tokens[inner]." + (isValue ? "Value" : "Type") + ") {";
+            foreach (string value in parts)
+            {
+                code += "case " + (isValue ? "" : "Type.") + value + ":";
+            }
+
+            if ((partIndex + 1) < allParts.Length)
+            {
+                if (isMany)
+                {
+                    code += "/* all good babies */";
+                    code += "inner++;";
+                }
+                else
+                {
+                    code += GenerateSwitch(allParts, partIndex + 1, true);
+                }
+            }
+            else
+            {
+                code += "/* all good babies */";
+            }
+            code += "break;";
+
+            if (isMany)
+            {
+                code += "case " + (isValue ? "" : "Type.") + lastPart + ":";
+                code += "  /* all good babies */";
+                code += "  doBreak = true; inner--;";
+                code += "  break;";
+            }
+
+            if (hasErrorHandle)
+            {
+                code += "default: errors.Add(new ParseError(tokens[inner].Line, \"Expected " + String.Join(", ", parts).Replace("\"", "\\\"") + "\")); inner++; break;";
+            }
+            code += "}";
+
+            if (isMany)
+            {
+                code += "}";
+                code += GenerateSwitch(allParts, partIndex + 1, true);
+            }
+
+            code += "} else {";
+            code += "errors.Add(new ParseError(tokens[tokens.Length - 1].Line, \"Expected " + String.Join(", ", parts).Replace("\"", "\\\"") + "\"));";
+            code += "}";
+
+            return code;
         }
 
         public string[] GetOutput()
