@@ -29,7 +29,7 @@ namespace coolex
                 }
             }
 
-            lex.Lex(String.Join(Environment.NewLine, lines));
+            lex.Lex(String.Join(" " + Environment.NewLine, lines));
 
             //PrintBlock(lex.GetTokens());
 
