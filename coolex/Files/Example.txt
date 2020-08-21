@@ -25,7 +25,7 @@ Dcl-Proc Geotab_Call;
   Dcl-S AuthJSON Pointer;
   Dcl-S Response SQLTYPE(CLOB:262144);
 
-  If %Parms() >= 2;
+  If (%Parms >= 2);
     AuthJSON = JSON_ParseString(pToken);
     request.URL = 'https://'
                 + JSON_GetStr(AuthJSON:'result.path')
@@ -66,16 +66,16 @@ Dcl-Proc Geotab_Successful Export;
     pResult Pointer Options(*NoPass);
   End-Pi;
 
-  If (sqlstate <> '00000');
+  If sqlstate <> '00000';
     Return *Off;
   Endif;
 
-  If (%Parms >= 1);
-    If (JSON_Error(pResult));
+  If %Parms() >= 1;
+    If JSON_Error(pResult);
       Return *Off;
     Endif;
 
-    If (JSON_Has(pResult:'error'));
+    If JSON_Has(pResult:'error');
       Return *Off;
     Endif;
   Endif;

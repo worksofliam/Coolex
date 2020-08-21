@@ -24,7 +24,7 @@ namespace coolex
                 if (lines[i].Contains("//"))
                 {
                     commentIndex = lines[i].IndexOf("//");
-                    if (lines[i].LastIndexOf("'", commentIndex) == -1)
+                    if (lines[i].Substring(0, commentIndex).Count(f => f == '\'') % 2 == 0)
                         lines[i] = lines[i].Substring(0, commentIndex);
                 }
             }
@@ -39,7 +39,8 @@ namespace coolex
             {
                 Console.WriteLine("Error " + error.Line.ToString() + ": " + error.Text);
             }
-            
+
+            Console.WriteLine("Done");
             Console.ReadLine();
         }
 
