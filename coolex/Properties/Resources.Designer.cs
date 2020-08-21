@@ -61,22 +61,51 @@ namespace coolex.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 		public List&lt;CoolexType&gt; TokenList = new List&lt;CoolexType&gt;();
+        ///   Looks up a localized string similar to toVersion = &apos;&apos;;
+        ///length = 1;
         ///
-        ///        private Boolean InString = false;
-        ///        private string token = &quot;&quot;;
-        ///        private int cIndex = 0;
-        ///        private bool IsOperator = false;
-        ///        public void Lex(string Text)
+        ///search = Geotab_NewObject();
+        ///
+        ///date = %date;
+        ///Geotab_SetStr(search:&apos;fromDate&apos;:%char(date:*iso));
+        ///
+        ///Dow (length &gt; 0);
+        ///  Geotab_Close(data);
+        ///
+        ///  data = Geotab_GetFeed(authinfo:&apos;ExceptionEvent&apos;:500:toVersion:search);
+        ///  toVersion = Geotab_StringAt(data:&apos;result.toVersion&apos;);
+        ///
+        ///  //Amount of elements returned
+        ///  length = Geotab_GetCount(data);
+        ///
+        ///  If (length &gt; 0);
+        ///    Dsply (&apos;Count: &apos; + %char(length) + &apos;-&apos; + %trimr(toVersion));
+        ///  Else;
+        ///    Geotab_Close(data);
+        ///    Leave;
+        /// [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string Example {
+            get {
+                return ResourceManager.GetString("Example", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to         
+        ///
+        ///		//***************************************************
+        ///		private CoolexType TokenList = new CoolexType(Type.BLOCK, &quot;&quot;, 0);
+        ///		public List&lt;CoolexType&gt; GetTokens() =&gt; TokenList.Block;
+        ///
+        ///		//***************************************************
+        ///        private int printIndex = -1;
+        ///        public void PrintBlock(List&lt;CoolexType&gt; Block)
         ///        {
-        ///            while (cIndex &lt; Text.Length)
+        ///            printIndex++;
+        ///            foreach (CoolexType Token in Block)
         ///            {
-        ///                IsOperator = false;
-        ///                if (InString == false)
-        ///                {
-        ///                    foreach (string Operator in OPERATORS)
-        ///                    {
-        ///         [rest of string was truncated]&quot;;.
+        ///                Console.WriteLine(&quot;&quot;.PadRight(printIndex, &apos;\ [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string Template {
             get {
@@ -87,15 +116,28 @@ namespace coolex.Properties {
         /// <summary>
         ///   Looks up a localized string similar to     class CoolexType
         ///    {
+        ///        public List&lt;CoolexType&gt; Block;
         ///        public CoolexLex.Type Type;
         ///        public string Value;
+        ///		public int Line;
         ///
-        ///        public CoolexType(CoolexLex.Type type, string value)
+        ///        public CoolexType(CoolexLex.Type type, string value, int line)
         ///        {
         ///            Type = type;
         ///            Value = value;
+        ///			Line = line;
+        ///            Block = null;
         ///        }
-        ///    }.
+        ///    }
+        ///
+        ///	class ParseError 
+        ///	{
+        ///		public int Line;
+        ///		public string Text;
+        ///
+        ///		public ParseError(int line, string text) {
+        ///		  this.Line = line;
+        ///		  this.Text = [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string TypeClass {
             get {

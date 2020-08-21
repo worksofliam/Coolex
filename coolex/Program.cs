@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace coolex
 {
@@ -10,15 +11,27 @@ namespace coolex
             string Definition = args[0];
             string Structure = (args.Length > 1 ? args[1] : "");
 
-            //CoolexGenerator gen = new CoolexGenerator(Definition, Structure);
-            //gen.CreateOutput();
-            //gen.GenerateParser();
+            CoolexGenerator gen = new CoolexGenerator(Definition, Structure);
+            gen.CreateOutput();
 
             CoolexLex lex = new CoolexLex();
 
-            lex.Lex("Dcl-S hello char(5); hello = 'hi' + 'world'; If abcd < 1244;");
+            List<String> lines = Properties.Resources.Example.Split(new string[] { Environment.NewLine }, StringSplitOptions.None).ToList();
 
-            PrintBlock(lex.GetTokens());
+            int commentIndex;
+            for(int i = lines.Count-1; i >= 0; i--)
+            {
+                if (lines[i].Contains("//"))
+                {
+                    commentIndex = lines[i].IndexOf("//");
+                    if (lines[i].LastIndexOf("'", commentIndex) == -1)
+                        lines[i] = lines[i].Substring(0, commentIndex);
+                }
+            }
+
+            lex.Lex(String.Join(Environment.NewLine, lines));
+
+            //PrintBlock(lex.GetTokens());
 
             Console.WriteLine("");
 

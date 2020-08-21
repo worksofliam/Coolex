@@ -11,6 +11,8 @@ namespace coolex
     {
         private String Definition;
         private String Structure;
+
+        private bool insensitive = false;
         private List<string> Output = new List<string>();
         private Dictionary<string, string> Config = new Dictionary<string, string>();
 
@@ -20,11 +22,6 @@ namespace coolex
             this.Structure = Structure;
             string[] data;
 
-            if (File.Exists(Structure))
-            {
-                this.GenerateParser();
-            }
-
             if (File.Exists(Definition))
             {
                 foreach (string Line in File.ReadAllLines(Definition))
@@ -33,12 +30,27 @@ namespace coolex
                     if (Line.StartsWith("#")) continue;
 
                     data = Line.Split(new[] { ':' }, 2);
-                    Config.Add(data[0], data[1]);
+                    Config.Add(data[0], data[1].Trim());
+                }
+
+
+                if (Config.ContainsKey("SENSITIVE"))
+                {
+                    if (Config["SENSITIVE"] == "false")
+                    {
+                        this.insensitive = true;
+                    }
+                    Config.Remove("SENSITIVE");
                 }
             }
             else
             {
                 WriteMessage("Error", "File not found: " + Definition);
+            }
+            
+            if (File.Exists(Structure))
+            {
+                this.GenerateParser();
             }
         }
 
@@ -55,6 +67,22 @@ namespace coolex
             List<string> TypeEnum = new List<string>();
             List<string> Pieces = new List<string>();
             string operators = "", string_literal = "", block_open = "", block_close = "";
+
+            string Template = Properties.Resources.Template;
+
+            //Is it a case insensitive language?
+            if (this.insensitive)
+            {
+                Template = Template.Replace("(Value == piece)", "(Value.ToUpper() == piece.ToUpper())");
+            }
+
+            //Is it a case insensitive language?
+            if (Config.ContainsKey("SEPERATE_BLOCK"))
+            {
+                if (Config["SEPERATE_BLOCK"] == "true")
+                    Template = Template.Replace("//--SEPERATE_BLOCK--", "GetLastToken().Add(new CoolexType(Type.BLOCK, piece, CurrentLine));");
+                Config.Remove("SEPERATE_BLOCK");
+            }
 
             //Grab operators
             if (!Config.ContainsKey("OPERATORS"))
@@ -145,7 +173,7 @@ namespace coolex
             Output.Add(String.Join(",", Pieces));
             Output.Add("};");
 
-            Output.AddRange(Properties.Resources.Template.Split(new string[] { Environment.NewLine }, StringSplitOptions.None));
+            Output.AddRange(Template.Split(new string[] { Environment.NewLine }, StringSplitOptions.None));
 
             if (ParserOutput.Count > 0)
                 Output.AddRange(ParserOutput);
@@ -219,10 +247,10 @@ namespace coolex
                 code += "for (; inner < tokens.Length && doBreak == false; ) {";
             }
 
-            code += "switch (tokens[inner]." + (isValue ? "Value" : "Type") + ") {";
+            code += "switch (tokens[inner]." + (isValue ? "Value" + (this.insensitive ? ".ToUpper()" : "") : "Type") + ") {";
             foreach (string value in parts)
             {
-                code += "case " + (isValue ? "" : "Type.") + value + ":";
+                code += "case " + (isValue ? "" : "Type.") + (this.insensitive ? value.ToUpper() : value) + ":";
             }
 
             if ((partIndex + 1) < allParts.Length)
@@ -248,19 +276,26 @@ namespace coolex
                 code += "case " + (isValue ? "" : "Type.") + lastPart + ":";
                 code += "  /* all good babies */";
                 code += "  doBreak = true; inner--;";
+                code += GenerateSwitch(allParts, partIndex + 1, true);
                 code += "  break;";
             }
 
             if (hasErrorHandle)
             {
-                code += "default: errors.Add(new ParseError(tokens[inner].Line, \"Expected " + String.Join(", ", parts).Replace("\"", "\\\"") + "\")); inner++; break;";
+                if (isMany)
+                {
+                    code += "default: errors.Add(new ParseError(tokens[inner].Line, \"Expected " + lastPart + ", got \" + tokens[inner].Value)); doBreak = true; inner++; break;";
+                }
+                else
+                {
+                    code += "default: errors.Add(new ParseError(tokens[inner].Line, \"Expected " + String.Join(", ", parts).Replace("\"", "\\\"") + ", got \" + tokens[inner].Value)); inner++; break;";
+                }
             }
             code += "}";
 
             if (isMany)
             {
                 code += "}";
-                code += GenerateSwitch(allParts, partIndex + 1, true);
             }
 
             code += "} else {";

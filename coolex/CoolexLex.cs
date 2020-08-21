@@ -8,328 +8,17 @@ namespace coolex
     {
         public enum Type
         {
-            BLOCK,
-            UNKNOWN,
-            OPERATOR,
-            STRING_LITERAL,
-            BLOCK_OPEN,
-            BLOCK_CLOSE,
-            DCL,
-            ENDDCL,
-            OPERATION,
-            BIF,
-            SPECIAL,
-            DIRECTIVE,
-            INT_LITERAL,
-            DOUBLE_LITERAL,
-            WORD_LITERAL,
-            EQUALS,
-            PARMS,
-            STMT_END,
-            DOT,
-            ADD,
-            SUB,
-            DIV,
-            MUL,
-            LESS_THAN,
-            MORE_THAN,
-            NOT,
-            MT_EQUAL,
-            LT_EQUAL
+            BLOCK, UNKNOWN, OPERATOR, STRING_LITERAL, BLOCK_OPEN, BLOCK_CLOSE, DCL, ENDDCL, OPERATION, BIF, SPECIAL, DIRECTIVE, DOUBLE_LITERAL, INT_LITERAL, WORD_LITERAL, EQUALS, PARMS, STMT_END, DOT, ADD, SUB, DIV, MUL, LESS_THAN, MORE_THAN, NOT, MT_EQUAL, LT_EQUAL
         }
-        private string[] OPERATORS = new[] {
-      "<>",
-      "<=",
-      ">=",
-      ".",
-      "(",
-      ")",
-      ";",
-      ":",
-      "=",
-      "+",
-      "/",
-      "*",
-      "-",
-      "<",
-      ">",
-      " "
-    };
-        private char[] STRING_LITERAL = new[] {
-      '\''
-    };
-        private string[] BLOCK_OPEN = new[] {
-      "("
-    };
-        private string[] BLOCK_CLOSE = new[] {
-      ")"
-    };
-        private Dictionary<Type,
-        string[]> Pieces = new Dictionary<Type,
-        string[]> {
-      {
-        Type.BLOCK_OPEN,
-        new[] {
-          "("
-        }
-      },
-      {
-        Type.BLOCK_CLOSE,
-        new[] {
-          ")"
-        }
-      },
-      {
-        Type.DCL,
-        new[] {
-          "DCL"
-        }
-      },
-      {
-        Type.ENDDCL,
-        new[] {
-          "END"
-        }
-      },
-      {
-        Type.OPERATION,
-        new[] {
-          "ENDIF",
-          "ENDSL",
-          "ENDDO",
-          "ENDFOR",
-          "ACQ",
-          "ADD",
-          "ADDDUR",
-          "ALLOC",
-          "ANDxx",
-          "BEGSR",
-          "BITOFF",
-          "BITON",
-          "CABxx",
-          "CALL",
-          "CALLB",
-          "CALLP",
-          "CASxx",
-          "CAT",
-          "CHAIN",
-          "CHECK",
-          "CHECKR",
-          "CLEAR",
-          "CLOSE",
-          "COMMIT",
-          "COMP",
-          "DEALLOC",
-          "DEFINE",
-          "DELETE",
-          "DIV",
-          "DO",
-          "DOU",
-          "DOUxx",
-          "DOW",
-          "DOWxx",
-          "DSPLY",
-          "DUMP",
-          "ELSE",
-          "ELSEIF",
-          "ENDyy",
-          "ENDSR",
-          "EVAL",
-          "EVALR",
-          "EVAL-CORR",
-          "EXCEPT",
-          "EXFMT",
-          "EXSR",
-          "EXTRCT",
-          "FEOD",
-          "FOR",
-          "FORCE",
-          "GOTO",
-          "IF",
-          "IFxx",
-          "IN",
-          "ITER",
-          "KFLD",
-          "KLIST",
-          "LEAVE",
-          "LEAVESR",
-          "LOOKUP",
-          "MHHZO",
-          "MHLZO",
-          "MLHZO",
-          "MLLZO",
-          "MONITOR",
-          "MOVE",
-          "MOVEA",
-          "MOVEL",
-          "MULT",
-          "MVR",
-          "NEXT",
-          "OCCUR",
-          "ON-ERROR",
-          "ON-EXIT",
-          "OPEN",
-          "ORxx",
-          "OTHER",
-          "OUT",
-          "PARM",
-          "PLIST",
-          "POST",
-          "READ",
-          "READC",
-          "READE",
-          "READP",
-          "READPE",
-          "REALLOC",
-          "REL",
-          "RESET",
-          "RETURN",
-          "ROLBK",
-          "SCAN",
-          "SELECT",
-          "SETGT",
-          "SETLL",
-          "SETOFF",
-          "SETON",
-          "SHTDN",
-          "SORTA",
-          "SQRT",
-          "SUB",
-          "SUBDUR",
-          "SUBST",
-          "TAG",
-          "TEST",
-          "TESTB",
-          "TESTN",
-          "TESTZ",
-          "TIME",
-          "UNLOCK",
-          "UPDATE",
-          "WHEN",
-          "WHENxx",
-          "WRITE",
-          "XFOOT",
-          "XLATE",
-          "XML-INTO",
-          "XML-SAX",
-          "Z-ADD",
-          "Z-SUB"
-        }
-      },
-      {
-        Type.BIF,
-        new[] {
-          "/\\%\\S*/"
-        }
-      },
-      {
-        Type.SPECIAL,
-        new[] {
-          "/\\*\\S*/"
-        }
-      },
-      {
-        Type.DIRECTIVE,
-        new[] {
-          "/\\/\\S*/"
-        }
-      },
-      {
-        Type.INT_LITERAL,
-        new[] {
-          "/^[-+]?\\d+$/"
-        }
-      },
-      {
-        Type.DOUBLE_LITERAL,
-        new[] {@"/(?<=^| )\\d+(\\.\\d+)?(?=$| )/"
-        }
-      },
-      {
-        Type.WORD_LITERAL,
-        new[] {
-          "/.*?/"
-        }
-      },
-      {
-        Type.EQUALS,
-        new[] {
-          "="
-        }
-      },
-      {
-        Type.PARMS,
-        new[] {
-          ":"
-        }
-      },
-      {
-        Type.STMT_END,
-        new[] {
-          ";"
-        }
-      },
-      {
-        Type.DOT,
-        new[] {
-          "."
-        }
-      },
-      {
-        Type.ADD,
-        new[] {
-          "+"
-        }
-      },
-      {
-        Type.SUB,
-        new[] {
-          "-"
-        }
-      },
-      {
-        Type.DIV,
-        new[] {
-          "/"
-        }
-      },
-      {
-        Type.MUL,
-        new[] {
-          "*"
-        }
-      },
-      {
-        Type.LESS_THAN,
-        new[] {
-          "<"
-        }
-      },
-      {
-        Type.MORE_THAN,
-        new[] {
-          ">"
-        }
-      },
-      {
-        Type.NOT,
-        new[] {
-          "<>"
-        }
-      },
-      {
-        Type.MT_EQUAL,
-        new[] {
-          ">="
-        }
-      },
-      {
-        Type.LT_EQUAL,
-        new[] {
-          "<="
-        }
-      }
-        };
+        private string[] OPERATORS = new[] { "<>", "<=", ">=", ".", "(", ")", ";", ":", "=", "+", "/", "*", "-", "<", ">", " " };
+        private char[] STRING_LITERAL = new[] { '\'' };
+        private string[] BLOCK_OPEN = new[] { "(" };
+        private string[] BLOCK_CLOSE = new[] { ")" };
+        private Dictionary<Type, string[]> Pieces = new Dictionary<Type, string[]>
+{
+{ Type.BLOCK_OPEN, new[] { "(" } },{ Type.BLOCK_CLOSE, new[] { ")" } },{ Type.DCL, new[] { "DCL" } },{ Type.ENDDCL, new[] { "END" } },{ Type.OPERATION, new[] { "ENDIF", "ENDSL", "ENDDO", "ENDFOR", "ACQ", "ADD", "ADDDUR", "ALLOC", "ANDxx", "BEGSR", "BITOFF", "BITON", "CABxx", "CALL", "CALLB", "CALLP", "CASxx", "CAT", "CHAIN", "CHECK", "CHECKR", "CLEAR", "CLOSE", "COMMIT", "COMP", "DEALLOC", "DEFINE", "DELETE", "DIV", "DO", "DOU", "DOUxx", "DOW", "DOWxx", "DSPLY", "DUMP", "ELSE", "ELSEIF", "ENDyy", "ENDSR", "EVAL", "EVALR", "EVAL-CORR", "EXCEPT", "EXFMT", "EXSR", "EXTRCT", "FEOD", "FOR", "FORCE", "GOTO", "IF", "IFxx", "IN", "ITER", "KFLD", "KLIST", "LEAVE", "LEAVESR", "LOOKUP", "MHHZO", "MHLZO", "MLHZO", "MLLZO", "MONITOR", "MOVE", "MOVEA", "MOVEL", "MULT", "MVR", "NEXT", "OCCUR", "ON-ERROR", "ON-EXIT", "OPEN", "ORxx", "OTHER", "OUT", "PLIST", "POST", "READ", "READC", "READE", "READP", "READPE", "REALLOC", "REL", "RESET", "RETURN", "ROLBK", "SCAN", "SELECT", "SETGT", "SETLL", "SETOFF", "SETON", "SHTDN", "SORTA", "SQRT", "SUB", "SUBDUR", "SUBST", "TAG", "TEST", "TESTB", "TESTN", "TESTZ", "TIME", "UNLOCK", "UPDATE", "WHEN", "WHENxx", "WRITE", "XFOOT", "XLATE", "XML-INTO", "XML-SAX", "Z-ADD", "Z-SUB" } },{ Type.BIF, new[] { "/\\%\\S*/" } },{ Type.SPECIAL, new[] { "/\\*\\S*/" } },{ Type.DIRECTIVE, new[] { "/\\/\\S*/" } },{ Type.DOUBLE_LITERAL, new[] { @"/(?<=^| )\\d+(\\.\\d+)?(?=$| )/" } },{ Type.INT_LITERAL, new[] { "/^[-+]?\\d+$/" } },{ Type.WORD_LITERAL, new[] { "/.*?/" } },{ Type.EQUALS, new[] { "=" } },{ Type.PARMS, new[] { ":" } },{ Type.STMT_END, new[] { ";" } },{ Type.DOT, new[] { "." } },{ Type.ADD, new[] { "+" } },{ Type.SUB, new[] { "-" } },{ Type.DIV, new[] { "/" } },{ Type.MUL, new[] { "*" } },{ Type.LESS_THAN, new[] { "<" } },{ Type.MORE_THAN, new[] { ">" } },{ Type.NOT, new[] { "<>" } },{ Type.MT_EQUAL, new[] { ">=" } },{ Type.LT_EQUAL, new[] { "<=" } }
+};
+
 
         //***************************************************
         private CoolexType TokenList = new CoolexType(Type.BLOCK, "", 0);
@@ -344,11 +33,13 @@ namespace coolex
             {
                 Console.WriteLine("".PadRight(printIndex, '\t') + Token.Type.ToString() + " " + Token.Value);
 
-                if (Token.Block != null) PrintBlock(Token.Block);
+                if (Token.Block != null)
+                    PrintBlock(Token.Block);
 
             }
             printIndex--;
         }
+
 
         //***************************************************
         private Boolean InString = false;
@@ -363,7 +54,8 @@ namespace coolex
             {
                 IsOperator = false;
 
-                if (cIndex + 2 > Text.Length) { }
+                if (cIndex + 2 > Text.Length)
+                { }
                 else
                 {
                     if (Text.Substring(cIndex, 2) == Environment.NewLine)
@@ -401,7 +93,8 @@ namespace coolex
 
                     if (STRING_LITERAL.Contains(c))
                     {
-                        if (Text.Substring(cIndex - 1, 1) == "\\") token += c;
+                        if (Text.Substring(cIndex - 1, 1) == "\\")
+                            token += c;
                         else
                         {
                             //This means it's end of STRING_LITERAL, and must be added to token list
@@ -409,7 +102,9 @@ namespace coolex
                             InString = !InString;
                         }
                     }
-                    else token += c;
+                    else
+                        token += c;
+
 
                     cIndex++;
                 }
@@ -429,7 +124,8 @@ namespace coolex
             {
                 if (Result.Count() > 0)
                 {
-                    if (Result[Result.Count - 1].Block == null) Result[Result.Count - 1].Block = new List<CoolexType>();
+                    if (Result[Result.Count - 1].Block == null)
+                        Result[Result.Count - 1].Block = new List<CoolexType>();
 
                     Result = Result[Result.Count - 1].Block;
                 }
@@ -465,6 +161,7 @@ namespace coolex
                                 {
                                     if (BLOCK_OPEN.Contains(piece))
                                     {
+                                        GetLastToken().Add(new CoolexType(Type.BLOCK, piece, CurrentLine));
                                         GetLastToken(1);
                                     }
                                     else if (BLOCK_CLOSE.Contains(piece))
@@ -490,504 +187,20 @@ namespace coolex
         }
         public static ParseError[] Parse(CoolexType[] tokens)
         {
-            int inner;
-            bool doBreak;
-            List<ParseError> errors = new List<ParseError>();
+            int inner; bool doBreak; List<ParseError> errors = new List<ParseError>();
             for (int i = 0; i < tokens.Length; i++)
             {
-                inner = i;
-                if (inner < tokens.Length)
-                {
-                    switch (tokens[inner].Type)
-                    {
-                        case Type.DCL:
-                            inner++;
-                            if (inner < tokens.Length)
-                            {
-                                switch (tokens[inner].Type)
-                                {
-                                    case Type.SUB:
-                                        inner++;
-                                        if (inner < tokens.Length)
-                                        {
-                                            switch (tokens[inner].Value)
-                                            {
-                                                case "F":
-                                                case "S":
-                                                case "DS":
-                                                case "PARM":
-                                                case "SUBF":
-                                                case "PR":
-                                                case "PI":
-                                                case "C":
-                                                    /* all good babies */
-                                                    break;
-                                                default:
-                                                    errors.Add(new ParseError(tokens[inner].Line, "Expected \"F\", \"S\", \"DS\", \"PARM\", \"SUBF\", \"PR\", \"PI\", \"C\""));
-                                                    inner++;
-                                                    break;
-                                            }
-                                        }
-                                        else
-                                        {
-                                            errors.Add(new ParseError(tokens[tokens.Length - 1].Line, "Expected \"F\", \"S\", \"DS\", \"PARM\", \"SUBF\", \"PR\", \"PI\", \"C\""));
-                                        }
-                                        break;
-                                    default:
-                                        errors.Add(new ParseError(tokens[inner].Line, "Expected SUB"));
-                                        inner++;
-                                        break;
-                                }
-                            }
-                            else
-                            {
-                                errors.Add(new ParseError(tokens[tokens.Length - 1].Line, "Expected SUB"));
-                            }
-                            break;
-                    }
-                }
-                else
-                {
-                    errors.Add(new ParseError(tokens[tokens.Length - 1].Line, "Expected DCL"));
-                }
-                inner = i;
-                if (inner < tokens.Length)
-                {
-                    switch (tokens[inner].Value)
-                    {
-                        case "F":
-                        case "S":
-                        case "DS":
-                        case "PARM":
-                        case "SUBF":
-                        case "PR":
-                            inner++;
-                            if (inner < tokens.Length)
-                            {
-                                switch (tokens[inner].Type)
-                                {
-                                    case Type.WORD_LITERAL:
-                                        inner++;
-                                        if (inner < tokens.Length)
-                                        {
-                                            doBreak = false;
-                                            for (; inner < tokens.Length && doBreak == false;)
-                                            {
-                                                switch (tokens[inner].Type)
-                                                {
-                                                    case Type.WORD_LITERAL:
-                                                    case Type.BLOCK:
-                                                        /* all good babies */
-                                                        inner++;
-                                                        break;
-                                                    case Type.STMT_END:
-                                                        /* all good babies */
-                                                        doBreak = true;
-                                                        inner--;
-                                                        break;
-                                                    default:
-                                                        errors.Add(new ParseError(tokens[inner].Line, "Expected WORD_LITERAL, BLOCK"));
-                                                        inner++;
-                                                        break;
-                                                }
-                                            }
-                                            inner++;
-                                            if (inner < tokens.Length)
-                                            {
-                                                switch (tokens[inner].Type)
-                                                {
-                                                    case Type.STMT_END:
-                                                        /* all good babies */
-                                                        break;
-                                                    default:
-                                                        errors.Add(new ParseError(tokens[inner].Line, "Expected STMT_END"));
-                                                        inner++;
-                                                        break;
-                                                }
-                                            }
-                                            else
-                                            {
-                                                errors.Add(new ParseError(tokens[tokens.Length - 1].Line, "Expected STMT_END"));
-                                            }
-                                        }
-                                        else
-                                        {
-                                            errors.Add(new ParseError(tokens[tokens.Length - 1].Line, "Expected WORD_LITERAL, BLOCK"));
-                                        }
-                                        break;
-                                    default:
-                                        errors.Add(new ParseError(tokens[inner].Line, "Expected WORD_LITERAL"));
-                                        inner++;
-                                        break;
-                                }
-                            }
-                            else
-                            {
-                                errors.Add(new ParseError(tokens[tokens.Length - 1].Line, "Expected WORD_LITERAL"));
-                            }
-                            break;
-                    }
-                }
-                else
-                {
-                    errors.Add(new ParseError(tokens[tokens.Length - 1].Line, "Expected \"F\", \"S\", \"DS\", \"PARM\", \"SUBF\", \"PR\""));
-                }
-                inner = i;
-                if (inner < tokens.Length)
-                {
-                    switch (tokens[inner].Value)
-                    {
-                        case "PI":
-                            inner++;
-                            if (inner < tokens.Length)
-                            {
-                                doBreak = false;
-                                for (; inner < tokens.Length && doBreak == false;)
-                                {
-                                    switch (tokens[inner].Type)
-                                    {
-                                        case Type.WORD_LITERAL:
-                                        case Type.SPECIAL:
-                                        case Type.ENDDCL:
-                                        case Type.SUB:
-                                            /* all good babies */
-                                            inner++;
-                                            break;
-                                        case Type.STMT_END:
-                                            /* all good babies */
-                                            doBreak = true;
-                                            inner--;
-                                            break;
-                                        default:
-                                            errors.Add(new ParseError(tokens[inner].Line, "Expected WORD_LITERAL, SPECIAL, ENDDCL, SUB"));
-                                            inner++;
-                                            break;
-                                    }
-                                }
-                                inner++;
-                                if (inner < tokens.Length)
-                                {
-                                    switch (tokens[inner].Type)
-                                    {
-                                        case Type.STMT_END:
-                                            /* all good babies */
-                                            break;
-                                        default:
-                                            errors.Add(new ParseError(tokens[inner].Line, "Expected STMT_END"));
-                                            inner++;
-                                            break;
-                                    }
-                                }
-                                else
-                                {
-                                    errors.Add(new ParseError(tokens[tokens.Length - 1].Line, "Expected STMT_END"));
-                                }
-                            }
-                            else
-                            {
-                                errors.Add(new ParseError(tokens[tokens.Length - 1].Line, "Expected WORD_LITERAL, SPECIAL, ENDDCL, SUB"));
-                            }
-                            break;
-                    }
-                }
-                else
-                {
-                    errors.Add(new ParseError(tokens[tokens.Length - 1].Line, "Expected \"PI\""));
-                }
-                inner = i;
-                if (inner < tokens.Length)
-                {
-                    switch (tokens[inner].Value)
-                    {
-                        case "C":
-                            inner++;
-                            if (inner < tokens.Length)
-                            {
-                                doBreak = false;
-                                for (; inner < tokens.Length && doBreak == false;)
-                                {
-                                    switch (tokens[inner].Type)
-                                    {
-                                        case Type.WORD_LITERAL:
-                                        case Type.DOUBLE_LITERAL:
-                                        case Type.INT_LITERAL:
-                                        case Type.STRING_LITERAL:
-                                            /* all good babies */
-                                            inner++;
-                                            break;
-                                        case Type.STMT_END:
-                                            /* all good babies */
-                                            doBreak = true;
-                                            inner--;
-                                            break;
-                                        default:
-                                            errors.Add(new ParseError(tokens[inner].Line, "Expected WORD_LITERAL, DOUBLE_LITERAL, INT_LITERAL, STRING_LITERAL"));
-                                            inner++;
-                                            break;
-                                    }
-                                }
-                                inner++;
-                                if (inner < tokens.Length)
-                                {
-                                    switch (tokens[inner].Type)
-                                    {
-                                        case Type.STMT_END:
-                                            /* all good babies */
-                                            break;
-                                        default:
-                                            errors.Add(new ParseError(tokens[inner].Line, "Expected STMT_END"));
-                                            inner++;
-                                            break;
-                                    }
-                                }
-                                else
-                                {
-                                    errors.Add(new ParseError(tokens[tokens.Length - 1].Line, "Expected STMT_END"));
-                                }
-                            }
-                            else
-                            {
-                                errors.Add(new ParseError(tokens[tokens.Length - 1].Line, "Expected WORD_LITERAL, DOUBLE_LITERAL, INT_LITERAL, STRING_LITERAL"));
-                            }
-                            break;
-                    }
-                }
-                else
-                {
-                    errors.Add(new ParseError(tokens[tokens.Length - 1].Line, "Expected \"C\""));
-                }
-                inner = i;
-                if (inner < tokens.Length)
-                {
-                    switch (tokens[inner].Type)
-                    {
-                        case Type.OPERATION:
-                            inner++;
-                            if (inner < tokens.Length)
-                            {
-                                doBreak = false;
-                                for (; inner < tokens.Length && doBreak == false;)
-                                {
-                                    switch (tokens[inner].Type)
-                                    {
-                                        case Type.WORD_LITERAL:
-                                        case Type.DOUBLE_LITERAL:
-                                        case Type.INT_LITERAL:
-                                        case Type.STRING_LITERAL:
-                                        case Type.BLOCK:
-                                        case Type.EQUALS:
-                                            /* all good babies */
-                                            inner++;
-                                            break;
-                                        case Type.STMT_END:
-                                            /* all good babies */
-                                            doBreak = true;
-                                            inner--;
-                                            break;
-                                        default:
-                                            errors.Add(new ParseError(tokens[inner].Line, "Expected WORD_LITERAL, DOUBLE_LITERAL, INT_LITERAL, STRING_LITERAL, BLOCK, EQUALS"));
-                                            inner++;
-                                            break;
-                                    }
-                                }
-                                inner++;
-                                if (inner < tokens.Length)
-                                {
-                                    switch (tokens[inner].Type)
-                                    {
-                                        case Type.STMT_END:
-                                            /* all good babies */
-                                            break;
-                                        default:
-                                            errors.Add(new ParseError(tokens[inner].Line, "Expected STMT_END"));
-                                            inner++;
-                                            break;
-                                    }
-                                }
-                                else
-                                {
-                                    errors.Add(new ParseError(tokens[tokens.Length - 1].Line, "Expected STMT_END"));
-                                }
-                            }
-                            else
-                            {
-                                errors.Add(new ParseError(tokens[tokens.Length - 1].Line, "Expected WORD_LITERAL, DOUBLE_LITERAL, INT_LITERAL, STRING_LITERAL, BLOCK, EQUALS"));
-                            }
-                            break;
-                    }
-                }
-                else
-                {
-                    errors.Add(new ParseError(tokens[tokens.Length - 1].Line, "Expected OPERATION"));
-                }
-                inner = i;
-                if (inner < tokens.Length)
-                {
-                    switch (tokens[inner].Type)
-                    {
-                        case Type.ADD:
-                            inner++;
-                            if (inner < tokens.Length)
-                            {
-                                switch (tokens[inner].Type)
-                                {
-                                    case Type.WORD_LITERAL:
-                                    case Type.DOUBLE_LITERAL:
-                                    case Type.INT_LITERAL:
-                                    case Type.STRING_LITERAL:
-                                    case Type.BLOCK:
-                                        /* all good babies */
-                                        break;
-                                    default:
-                                        errors.Add(new ParseError(tokens[inner].Line, "Expected WORD_LITERAL, DOUBLE_LITERAL, INT_LITERAL, STRING_LITERAL, BLOCK"));
-                                        inner++;
-                                        break;
-                                }
-                            }
-                            else
-                            {
-                                errors.Add(new ParseError(tokens[tokens.Length - 1].Line, "Expected WORD_LITERAL, DOUBLE_LITERAL, INT_LITERAL, STRING_LITERAL, BLOCK"));
-                            }
-                            break;
-                    }
-                }
-                else
-                {
-                    errors.Add(new ParseError(tokens[tokens.Length - 1].Line, "Expected ADD"));
-                }
-                inner = i;
-                if (inner < tokens.Length)
-                {
-                    switch (tokens[inner].Type)
-                    {
-                        case Type.SUB:
-                            inner++;
-                            if (inner < tokens.Length)
-                            {
-                                switch (tokens[inner].Type)
-                                {
-                                    case Type.WORD_LITERAL:
-                                    case Type.DOUBLE_LITERAL:
-                                    case Type.INT_LITERAL:
-                                    case Type.BLOCK:
-                                        /* all good babies */
-                                        break;
-                                    default:
-                                        errors.Add(new ParseError(tokens[inner].Line, "Expected WORD_LITERAL, DOUBLE_LITERAL, INT_LITERAL, BLOCK"));
-                                        inner++;
-                                        break;
-                                }
-                            }
-                            else
-                            {
-                                errors.Add(new ParseError(tokens[tokens.Length - 1].Line, "Expected WORD_LITERAL, DOUBLE_LITERAL, INT_LITERAL, BLOCK"));
-                            }
-                            break;
-                    }
-                }
-                else
-                {
-                    errors.Add(new ParseError(tokens[tokens.Length - 1].Line, "Expected SUB"));
-                }
-                inner = i;
-                if (inner < tokens.Length)
-                {
-                    switch (tokens[inner].Type)
-                    {
-                        case Type.DIV:
-                            inner++;
-                            if (inner < tokens.Length)
-                            {
-                                switch (tokens[inner].Type)
-                                {
-                                    case Type.WORD_LITERAL:
-                                    case Type.DOUBLE_LITERAL:
-                                    case Type.INT_LITERAL:
-                                    case Type.BLOCK:
-                                        /* all good babies */
-                                        break;
-                                    default:
-                                        errors.Add(new ParseError(tokens[inner].Line, "Expected WORD_LITERAL, DOUBLE_LITERAL, INT_LITERAL, BLOCK"));
-                                        inner++;
-                                        break;
-                                }
-                            }
-                            else
-                            {
-                                errors.Add(new ParseError(tokens[tokens.Length - 1].Line, "Expected WORD_LITERAL, DOUBLE_LITERAL, INT_LITERAL, BLOCK"));
-                            }
-                            break;
-                    }
-                }
-                else
-                {
-                    errors.Add(new ParseError(tokens[tokens.Length - 1].Line, "Expected DIV"));
-                }
-                inner = i;
-                if (inner < tokens.Length)
-                {
-                    switch (tokens[inner].Type)
-                    {
-                        case Type.MUL:
-                            inner++;
-                            if (inner < tokens.Length)
-                            {
-                                switch (tokens[inner].Type)
-                                {
-                                    case Type.WORD_LITERAL:
-                                    case Type.DOUBLE_LITERAL:
-                                    case Type.INT_LITERAL:
-                                    case Type.BLOCK:
-                                        /* all good babies */
-                                        break;
-                                    default:
-                                        errors.Add(new ParseError(tokens[inner].Line, "Expected WORD_LITERAL, DOUBLE_LITERAL, INT_LITERAL, BLOCK"));
-                                        inner++;
-                                        break;
-                                }
-                            }
-                            else
-                            {
-                                errors.Add(new ParseError(tokens[tokens.Length - 1].Line, "Expected WORD_LITERAL, DOUBLE_LITERAL, INT_LITERAL, BLOCK"));
-                            }
-                            break;
-                    }
-                }
-                else
-                {
-                    errors.Add(new ParseError(tokens[tokens.Length - 1].Line, "Expected MUL"));
-                }
-                inner = i;
-                if (inner < tokens.Length)
-                {
-                    switch (tokens[inner].Type)
-                    {
-                        case Type.BIF:
-                            inner++;
-                            if (inner < tokens.Length)
-                            {
-                                switch (tokens[inner].Type)
-                                {
-                                    case Type.BLOCK:
-                                        /* all good babies */
-                                        break;
-                                    default:
-                                        errors.Add(new ParseError(tokens[inner].Line, "Expected BLOCK"));
-                                        inner++;
-                                        break;
-                                }
-                            }
-                            else
-                            {
-                                errors.Add(new ParseError(tokens[tokens.Length - 1].Line, "Expected BLOCK"));
-                            }
-                            break;
-                    }
-                }
-                else
-                {
-                    errors.Add(new ParseError(tokens[tokens.Length - 1].Line, "Expected BIF"));
-                }
+                inner = i; if (inner < tokens.Length) { switch (tokens[inner].Type) { case Type.DCL: inner++; if (inner < tokens.Length) { switch (tokens[inner].Type) { case Type.SUB: inner++; if (inner < tokens.Length) { switch (tokens[inner].Value.ToUpper()) { case "F": case "S": case "DS": case "PARM": case "SUBF": case "PR": case "PI": case "C": case "PROC":/* all good babies */break; default: errors.Add(new ParseError(tokens[inner].Line, "Expected \"F\", \"S\", \"DS\", \"PARM\", \"SUBF\", \"PR\", \"PI\", \"C\", \"PROC\", got " + tokens[inner].Value)); inner++; break; } } else { errors.Add(new ParseError(tokens[tokens.Length - 1].Line, "Expected \"F\", \"S\", \"DS\", \"PARM\", \"SUBF\", \"PR\", \"PI\", \"C\", \"PROC\"")); } break; default: errors.Add(new ParseError(tokens[inner].Line, "Expected SUB, got " + tokens[inner].Value)); inner++; break; } } else { errors.Add(new ParseError(tokens[tokens.Length - 1].Line, "Expected SUB")); } break; } } else { errors.Add(new ParseError(tokens[tokens.Length - 1].Line, "Expected DCL")); }
+                inner = i; if (inner < tokens.Length) { switch (tokens[inner].Value.ToUpper()) { case "F": case "S": case "DS": case "PARM": case "SUBF": case "PR": case "PROC": inner++; if (inner < tokens.Length) { doBreak = false; for (; inner < tokens.Length && doBreak == false;) { switch (tokens[inner].Type) { case Type.WORD_LITERAL: case Type.BLOCK:/* all good babies */inner++; break; case Type.STMT_END:  /* all good babies */  doBreak = true; inner--; inner++; if (inner < tokens.Length) { switch (tokens[inner].Type) { case Type.STMT_END:/* all good babies */break; default: errors.Add(new ParseError(tokens[inner].Line, "Expected STMT_END, got " + tokens[inner].Value)); inner++; break; } } else { errors.Add(new ParseError(tokens[tokens.Length - 1].Line, "Expected STMT_END")); } break; default: errors.Add(new ParseError(tokens[inner].Line, "Expected STMT_END, got " + tokens[inner].Value)); doBreak = true; inner++; break; } } } else { errors.Add(new ParseError(tokens[tokens.Length - 1].Line, "Expected WORD_LITERAL, BLOCK")); } break; } } else { errors.Add(new ParseError(tokens[tokens.Length - 1].Line, "Expected \"F\", \"S\", \"DS\", \"PARM\", \"SUBF\", \"PR\", \"PROC\"")); }
+                inner = i; if (inner < tokens.Length) { switch (tokens[inner].Value.ToUpper()) { case "PI": inner++; if (inner < tokens.Length) { doBreak = false; for (; inner < tokens.Length && doBreak == false;) { switch (tokens[inner].Type) { case Type.WORD_LITERAL: case Type.SPECIAL: case Type.ENDDCL: case Type.SUB: case Type.BLOCK:/* all good babies */inner++; break; case Type.STMT_END:  /* all good babies */  doBreak = true; inner--; inner++; if (inner < tokens.Length) { switch (tokens[inner].Type) { case Type.STMT_END:/* all good babies */break; default: errors.Add(new ParseError(tokens[inner].Line, "Expected STMT_END, got " + tokens[inner].Value)); inner++; break; } } else { errors.Add(new ParseError(tokens[tokens.Length - 1].Line, "Expected STMT_END")); } break; default: errors.Add(new ParseError(tokens[inner].Line, "Expected STMT_END, got " + tokens[inner].Value)); doBreak = true; inner++; break; } } } else { errors.Add(new ParseError(tokens[tokens.Length - 1].Line, "Expected WORD_LITERAL, SPECIAL, ENDDCL, SUB, BLOCK")); } break; } } else { errors.Add(new ParseError(tokens[tokens.Length - 1].Line, "Expected \"PI\"")); }
+                inner = i; if (inner < tokens.Length) { switch (tokens[inner].Value.ToUpper()) { case "C": inner++; if (inner < tokens.Length) { doBreak = false; for (; inner < tokens.Length && doBreak == false;) { switch (tokens[inner].Type) { case Type.WORD_LITERAL: case Type.DOUBLE_LITERAL: case Type.INT_LITERAL: case Type.STRING_LITERAL:/* all good babies */inner++; break; case Type.STMT_END:  /* all good babies */  doBreak = true; inner--; inner++; if (inner < tokens.Length) { switch (tokens[inner].Type) { case Type.STMT_END:/* all good babies */break; default: errors.Add(new ParseError(tokens[inner].Line, "Expected STMT_END, got " + tokens[inner].Value)); inner++; break; } } else { errors.Add(new ParseError(tokens[tokens.Length - 1].Line, "Expected STMT_END")); } break; default: errors.Add(new ParseError(tokens[inner].Line, "Expected STMT_END, got " + tokens[inner].Value)); doBreak = true; inner++; break; } } } else { errors.Add(new ParseError(tokens[tokens.Length - 1].Line, "Expected WORD_LITERAL, DOUBLE_LITERAL, INT_LITERAL, STRING_LITERAL")); } break; } } else { errors.Add(new ParseError(tokens[tokens.Length - 1].Line, "Expected \"C\"")); }
+                inner = i; if (inner < tokens.Length) { switch (tokens[inner].Type) { case Type.OPERATION: inner++; if (inner < tokens.Length) { doBreak = false; for (; inner < tokens.Length && doBreak == false;) { switch (tokens[inner].Type) { case Type.WORD_LITERAL: case Type.DOUBLE_LITERAL: case Type.INT_LITERAL: case Type.STRING_LITERAL: case Type.BIF: case Type.BLOCK: case Type.EQUALS: case Type.DOT: case Type.ADD: case Type.SUB: case Type.DIV: case Type.MUL: case Type.LESS_THAN: case Type.MORE_THAN: case Type.NOT: case Type.MT_EQUAL: case Type.LT_EQUAL:/* all good babies */inner++; break; case Type.STMT_END:  /* all good babies */  doBreak = true; inner--; inner++; if (inner < tokens.Length) { switch (tokens[inner].Type) { case Type.STMT_END:/* all good babies */break; default: errors.Add(new ParseError(tokens[inner].Line, "Expected STMT_END, got " + tokens[inner].Value)); inner++; break; } } else { errors.Add(new ParseError(tokens[tokens.Length - 1].Line, "Expected STMT_END")); } break; default: errors.Add(new ParseError(tokens[inner].Line, "Expected STMT_END, got " + tokens[inner].Value)); doBreak = true; inner++; break; } } } else { errors.Add(new ParseError(tokens[tokens.Length - 1].Line, "Expected WORD_LITERAL, DOUBLE_LITERAL, INT_LITERAL, STRING_LITERAL, BIF, BLOCK, EQUALS, DOT, ADD, SUB, DIV, MUL, LESS_THAN, MORE_THAN, NOT, MT_EQUAL, LT_EQUAL")); } break; } } else { errors.Add(new ParseError(tokens[tokens.Length - 1].Line, "Expected OPERATION")); }
+                inner = i; if (inner < tokens.Length) { switch (tokens[inner].Value.ToUpper()) { case "BEGSR": inner++; if (inner < tokens.Length) { switch (tokens[inner].Type) { case Type.WORD_LITERAL:/* all good babies */break; default: errors.Add(new ParseError(tokens[inner].Line, "Expected WORD_LITERAL, got " + tokens[inner].Value)); inner++; break; } } else { errors.Add(new ParseError(tokens[tokens.Length - 1].Line, "Expected WORD_LITERAL")); } break; } } else { errors.Add(new ParseError(tokens[tokens.Length - 1].Line, "Expected \"BEGSR\"")); }
+                inner = i; if (inner < tokens.Length) { switch (tokens[inner].Type) { case Type.ADD: inner++; if (inner < tokens.Length) { switch (tokens[inner].Type) { case Type.WORD_LITERAL: case Type.DOUBLE_LITERAL: case Type.INT_LITERAL: case Type.STRING_LITERAL: case Type.BLOCK:/* all good babies */break; default: errors.Add(new ParseError(tokens[inner].Line, "Expected WORD_LITERAL, DOUBLE_LITERAL, INT_LITERAL, STRING_LITERAL, BLOCK, got " + tokens[inner].Value)); inner++; break; } } else { errors.Add(new ParseError(tokens[tokens.Length - 1].Line, "Expected WORD_LITERAL, DOUBLE_LITERAL, INT_LITERAL, STRING_LITERAL, BLOCK")); } break; } } else { errors.Add(new ParseError(tokens[tokens.Length - 1].Line, "Expected ADD")); }
+                inner = i; if (inner < tokens.Length) { switch (tokens[inner].Type) { case Type.SUB: inner++; if (inner < tokens.Length) { switch (tokens[inner].Type) { case Type.WORD_LITERAL: case Type.DOUBLE_LITERAL: case Type.INT_LITERAL: case Type.BLOCK:/* all good babies */break; default: errors.Add(new ParseError(tokens[inner].Line, "Expected WORD_LITERAL, DOUBLE_LITERAL, INT_LITERAL, BLOCK, got " + tokens[inner].Value)); inner++; break; } } else { errors.Add(new ParseError(tokens[tokens.Length - 1].Line, "Expected WORD_LITERAL, DOUBLE_LITERAL, INT_LITERAL, BLOCK")); } break; } } else { errors.Add(new ParseError(tokens[tokens.Length - 1].Line, "Expected SUB")); }
+                inner = i; if (inner < tokens.Length) { switch (tokens[inner].Type) { case Type.DIV: inner++; if (inner < tokens.Length) { switch (tokens[inner].Type) { case Type.WORD_LITERAL: case Type.DOUBLE_LITERAL: case Type.INT_LITERAL: case Type.BLOCK:/* all good babies */break; default: errors.Add(new ParseError(tokens[inner].Line, "Expected WORD_LITERAL, DOUBLE_LITERAL, INT_LITERAL, BLOCK, got " + tokens[inner].Value)); inner++; break; } } else { errors.Add(new ParseError(tokens[tokens.Length - 1].Line, "Expected WORD_LITERAL, DOUBLE_LITERAL, INT_LITERAL, BLOCK")); } break; } } else { errors.Add(new ParseError(tokens[tokens.Length - 1].Line, "Expected DIV")); }
+                inner = i; if (inner < tokens.Length) { switch (tokens[inner].Type) { case Type.MUL: inner++; if (inner < tokens.Length) { switch (tokens[inner].Type) { case Type.WORD_LITERAL: case Type.DOUBLE_LITERAL: case Type.INT_LITERAL: case Type.BLOCK:/* all good babies */break; default: errors.Add(new ParseError(tokens[inner].Line, "Expected WORD_LITERAL, DOUBLE_LITERAL, INT_LITERAL, BLOCK, got " + tokens[inner].Value)); inner++; break; } } else { errors.Add(new ParseError(tokens[tokens.Length - 1].Line, "Expected WORD_LITERAL, DOUBLE_LITERAL, INT_LITERAL, BLOCK")); } break; } } else { errors.Add(new ParseError(tokens[tokens.Length - 1].Line, "Expected MUL")); }
+                inner = i; if (inner < tokens.Length) { switch (tokens[inner].Type) { case Type.BIF: inner++; if (inner < tokens.Length) { switch (tokens[inner].Type) { case Type.BLOCK:/* all good babies */break; default: errors.Add(new ParseError(tokens[inner].Line, "Expected BLOCK, got " + tokens[inner].Value)); inner++; break; } } else { errors.Add(new ParseError(tokens[tokens.Length - 1].Line, "Expected BLOCK")); } break; } } else { errors.Add(new ParseError(tokens[tokens.Length - 1].Line, "Expected BIF")); }
             }
             return errors.ToArray();
         }
