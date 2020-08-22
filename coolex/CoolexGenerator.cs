@@ -73,16 +73,17 @@ namespace coolex
             //Is it a case insensitive language?
             if (this.insensitive)
             {
-                Template = Template.Replace("(Value == piece)", "(Value.ToUpper() == piece.ToUpper())");
+                Template = Template.Replace("(Value == piece)", "(Value.toUpperCase() == piece.toUpperCase())");
             }
 
             //Is it a case insensitive language?
             if (Config.ContainsKey("SEPERATE_BLOCK"))
             {
                 if (Config["SEPERATE_BLOCK"] == "true")
-                    Template = Template.Replace("//--SEPERATE_BLOCK--", "GetLastToken().Add(new CoolexType(Type.BLOCK, piece, CurrentLine));");
+                    Template = Template.Replace("//--SEPERATE_BLOCK--", "this.AddLastToken(0, new CoolexToken(Type.BLOCK, '', this.cIndex));");
                 Config.Remove("SEPERATE_BLOCK");
             }
+
 
             //Grab operators
             if (!Config.ContainsKey("OPERATORS"))
@@ -131,60 +132,52 @@ namespace coolex
                 WriteMessage("\t", EnumValue);
             }
 
-            Output.Add("using System;");
-            Output.Add("using System.Collections.Generic;");
-            Output.Add("using System.Linq;");
-            Output.Add("using System.Text.RegularExpressions;");
-
-            Output.Add("namespace coolex {");
-            Output.Add("class CoolexLex {");
-
             //Write enum to output
-            Output.Add("public enum Type {");
-            Output.Add(String.Join(", ", TypeEnum));
+            int enumValue = 0;
+            Output.Add("const Type = {");
+            foreach (string Type in TypeEnum)
+            {
+                Output.Add(Type + ": " + enumValue.ToString() + ",");
+                enumValue++;
+            }
             Output.Add("}");
 
             //Define operators
-            Output.Add("private string[] OPERATORS = new[] {" + operators + "};");
+            Output.Add("const OPERATORS = [" + operators + "];");
 
             //Define valid string constants
             if (string_literal == "")
-                Output.Add("private char[] STRING_LITERAL = new char[0];");
+                Output.Add("const STRING_LITERAL = [];");
             else
-                Output.Add("private char[] STRING_LITERAL = new[] {" + string_literal + "};");
+                Output.Add("const STRING_LITERAL = [" + string_literal + "];");
 
             //Define BLOCK_OPEN
             if (block_open == "")
-                Output.Add("private string[] BLOCK_OPEN = new string[0];");
+                Output.Add("const BLOCK_OPEN = [];");
             else
-                Output.Add("private string[] BLOCK_OPEN = new[] {" + block_open + "};");
+                Output.Add("const BLOCK_OPEN = [" + block_open + "];");
 
             //Define BLOCK_CLOSE
             if (block_open == "")
-                Output.Add("private string[] BLOCK_CLOSE = new string[0];");
+                Output.Add("const BLOCK_CLOSE = [];");
             else
-                Output.Add("private string[] BLOCK_CLOSE = new[] {" + block_close + "};");
+                Output.Add("const BLOCK_CLOSE = [" + block_close + "];");
 
             //Define user pieces
-            Output.Add("private Dictionary<Type, string[]> Pieces = new Dictionary<Type, string[]>");
-            Output.Add("{");
+            Output.Add("var Pieces = {}");
             foreach (var Piece in Config)
-                Pieces.Add("{ Type." + Piece.Key + ", new[] { " + Piece.Value + " } }");
-            Output.Add(String.Join(",", Pieces));
-            Output.Add("};");
+                Output.Add("Pieces[Type." + Piece.Key + "] = [" + Piece.Value + "];");
 
             Output.AddRange(Template.Split(new string[] { Environment.NewLine }, StringSplitOptions.None));
+
+            Output.AddRange(Properties.Resources.TypeClass.Split(new string[] { Environment.NewLine }, StringSplitOptions.None));
 
             if (ParserOutput.Count > 0)
                 Output.AddRange(ParserOutput);
 
-            Output.Add("}");
+            Output.Add("module.exports = {CoolexLexer, CoolexToken, ParseError, Parse};");
 
-            Output.AddRange(Properties.Resources.TypeClass.Split(new string[] { Environment.NewLine }, StringSplitOptions.None));
-
-            Output.Add("}");
-
-            string FileOut = Definition + ".cs";
+            string FileOut = Definition + ".js";
             WriteMessage("Notice", "Writing file: " + FileOut);
             File.WriteAllLines(FileOut, Output);
         }
@@ -194,9 +187,9 @@ namespace coolex
         {
             string[] Contents = File.ReadAllLines(this.Structure);
 
-            ParserOutput.Add("public static ParseError[] Parse(CoolexType[] tokens) {");
-            ParserOutput.Add("int inner; bool doBreak; List<ParseError> errors = new List<ParseError>();");
-            ParserOutput.Add("for (int i = 0; i < tokens.Length; i++) {");
+            ParserOutput.Add("function Parse(tokens) {");
+            ParserOutput.Add("var inner; var doBreak = false; var errors = [];");
+            ParserOutput.Add("for (var i = 0; i < tokens.length; i++) {");
 
             foreach (string Line in Contents)
             {
@@ -207,7 +200,7 @@ namespace coolex
 
             ParserOutput.Add("}");
 
-            ParserOutput.Add("return errors.ToArray();");
+            ParserOutput.Add("return errors;");
             ParserOutput.Add("}");
         }
 
@@ -237,17 +230,17 @@ namespace coolex
                 code += "inner = i;";
             }
 
-            code += "if (inner < tokens.Length) {";
+            code += "if (inner < tokens.length) {";
 
             if (isMany)
             {
                 lastPart = parts.Last();
                 parts.RemoveAt(parts.Count - 1);
                 code += "doBreak = false;";
-                code += "for (; inner < tokens.Length && doBreak == false; ) {";
+                code += "for (; inner < tokens.length && doBreak == false; ) {";
             }
 
-            code += "switch (tokens[inner]." + (isValue ? "Value" + (this.insensitive ? ".ToUpper()" : "") : "Type") + ") {";
+            code += "switch (tokens[inner]." + (isValue ? "Value" + (this.insensitive ? ".toUpperCase()" : "") : "Type") + ") {";
             foreach (string value in parts)
             {
                 code += "case " + (isValue ? "" : "Type.") + (this.insensitive ? value.ToUpper() : value) + ":";
@@ -284,11 +277,11 @@ namespace coolex
             {
                 if (isMany)
                 {
-                    code += "default: errors.Add(new ParseError(tokens[inner].Line, \"Expected " + lastPart + ", got \" + tokens[inner].Value)); doBreak = true; inner++; break;";
+                    code += "default: errors.push(new ParseError(tokens[inner].Index, \"Expected " + lastPart + ", got \" + tokens[inner].Value)); doBreak = true; inner++; break;";
                 }
                 else
                 {
-                    code += "default: errors.Add(new ParseError(tokens[inner].Line, \"Expected " + String.Join(", ", parts).Replace("\"", "\\\"") + ", got \" + tokens[inner].Value)); inner++; break;";
+                    code += "default: errors.push(new ParseError(tokens[inner].Index, \"Expected " + String.Join(", ", parts).Replace("\"", "\\\"") + ", got \" + tokens[inner].Value)); inner++; break;";
                 }
             }
             code += "}";
@@ -299,7 +292,7 @@ namespace coolex
             }
 
             code += "} else {";
-            code += "errors.Add(new ParseError(tokens[tokens.Length - 1].Line, \"Expected " + String.Join(", ", parts).Replace("\"", "\\\"") + "\"));";
+            code += "errors.push(new ParseError(tokens[tokens.Length - 1].Index, \"Expected " + String.Join(", ", parts).Replace("\"", "\\\"") + "\"));";
             code += "}";
 
             return code;

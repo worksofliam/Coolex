@@ -1,167 +1,196 @@
-﻿        
-
-		//***************************************************
-		private CoolexType TokenList = new CoolexType(Type.BLOCK, "", 0);
-		public List<CoolexType> GetTokens() => TokenList.Block;
-
-		//***************************************************
-        private int printIndex = -1;
-        public void PrintBlock(List<CoolexType> Block)
-        {
-            printIndex++;
-            foreach (CoolexType Token in Block)
-            {
-                Console.WriteLine("".PadRight(printIndex, '\t') + Token.Type.ToString() + " " + Token.Value);
-
-                if (Token.Block != null)
-                    PrintBlock(Token.Block);
-
-            }
-            printIndex--;
+﻿class CoolexLexer {
+  constructor() {
+      this.valid = true;
+      this.InString = false;
+      this.token = "";
+      this.cIndex = 0;
+      this.IsOperator = false;
+  
+      this.BlockIndex = 0;
+  
+      this.TokenList = [];
+    }
+  
+    /**
+     * 
+     * @param {string} Text RPG code to be lexed 
+     */
+    Lex(Text) {
+      Text = Text.split('\n');
+  
+      if (Text[0] !== '**FREE') {
+        console.log('Total freeformat only.');
+        this.valid = false;
+        return;
+      } else {
+        Text = Text.slice(1);
+      }
+  
+      for (var i = Text.length - 1; i >= 0; i--) {
+        if (Text[i][5] === "*") { 
+          Text.splice(i, 1);
+          continue;
         }
-		
-
-		//***************************************************
-        private Boolean InString = false;
-        private string token = "";
-        private int cIndex = 0;
-        private bool IsOperator = false;
-        private int CurrentLine = 1;
-        public void Lex(string Text)
-        {
-            TokenList.Block = new List<CoolexType>();
-            while (cIndex < Text.Length)
-            {
-                IsOperator = false;
-
-                if (cIndex + 2 > Text.Length)
-                    { }
-                else
-                {
-                    if (Text.Substring(cIndex, 2) == Environment.NewLine)
-                    {
-                        CurrentLine++;
-                        cIndex += 2;
-                        continue;
-                    }
-                }
-
-                if (InString == false)
-                {
-                    foreach (string Operator in OPERATORS)
-                    {
-                        if (cIndex + Operator.Length > Text.Length) continue;
-                        if (Text.Substring(cIndex, Operator.Length) == Operator)
-                        {
-                            //Sort the old token before adding the operator
-                            WorkToken();
-
-                            //Insert new token (operator token)
-                            token = Text.Substring(cIndex, Operator.Length);
-                            WorkToken();
-
-                            cIndex += Operator.Length;
-                            IsOperator = true;
-                            break;
-                        }
-                    }
-                }
-
-                if (IsOperator == false)
-                {
-                    char c = Text.Substring(cIndex, 1).ToCharArray()[0];
-
-                    if (STRING_LITERAL.Contains(c))
-                    {
-                        if (Text.Substring(cIndex - 1, 1) == "\\")
-                            token += c;
-                        else
-                        {
-                            //This means it's end of STRING_LITERAL, and must be added to token list
-                            WorkToken(InString);
-                            InString = !InString;
-                        }
-                    }
-                    else
-                        token += c;
-
-
-                    cIndex++;
-                }
-            }
-
-            WorkToken();
+  
+        if (Text[i].trim().startsWith('//')) {
+          Text.splice(i, 1);
+          continue;
         }
-
-        private int BlockIndex = 0;
-        private List<CoolexType> GetLastToken(int Direction = 0)
-        {
-            List<CoolexType> Result = TokenList.Block;
-
-            BlockIndex += Direction;
-
-            for (int levels = 0; levels < BlockIndex; levels++)
-            {
-                if (Result.Count() > 0)
-                {
-                    if (Result[Result.Count - 1].Block == null)
-                        Result[Result.Count - 1].Block = new List<CoolexType>();
-
-                    Result = Result[Result.Count - 1].Block;
-                }
-            }
-            
-            return Result;
-        }
-
-        public void WorkToken(Boolean stringToken = false)
-        {
-            string piece = token;
-            token = "";
-
-            if (piece != "")
-            {
-                if (stringToken == false)
-                {
-                    foreach (var Piece in Pieces)
-                    {
-                        foreach (string Value in Piece.Value)
-                        {
-                            if (Value.Length > 1 && Value.StartsWith("/") && Value.EndsWith("/") && !OPERATORS.Contains(piece))
-                            {
-                                if (System.Text.RegularExpressions.Regex.IsMatch(piece, Value.Trim('/')))
-                                {
-                                    GetLastToken().Add(new CoolexType(Piece.Key, piece, CurrentLine));
-                                    return;
-                                }
-                            }
-                            else
-                            {
-                                if (Value == piece)
-                                {
-                                    if (BLOCK_OPEN.Contains(piece))
-                                    {
-										//--SEPERATE_BLOCK--
-                                        GetLastToken(1);
-                                    }
-                                    else if (BLOCK_CLOSE.Contains(piece))
-                                    {
-                                        GetLastToken(-1);
-                                    }
-                                    else
-                                    {
-                                        GetLastToken().Add(new CoolexType(Piece.Key, piece, CurrentLine));
-                                    }
-                                    return;
-                                }
-                            }
-                        }
+      }
+  
+      Text = Text.join('');
+      var c = '';
+  
+      this.TokenList = [];
+  
+      while (this.cIndex < Text.length) {
+        this.IsOperator = false;
+  
+        if (!this.InString) {
+          for (const [key, Operator] of Object.entries(OPERATORS)) {
+            if (this.cIndex + Operator.length > Text.length) continue;
+  
+            if (Text.substr(this.cIndex, Operator.length) == Operator) {
+              if (Operator === "-") {
+                if (this.cIndex + 1 < Text.length) {
+                  c = Text.substr(this.cIndex + 1, 1);
+                  if (CoolexLexer.IsNumber(c)) { //is number
+                    c = Text.substr(this.cIndex - 1, 1);
+                    if (!CoolexLexer.IsNumber(c)) { //is not number
+                      this.token += Text.substr(this.cIndex, Operator.length);
+                      this.cIndex += 1;
+                      break;
                     }
+                  }
                 }
-                else
-                {
-                    GetLastToken().Add(new CoolexType(Type.STRING_LITERAL, piece, CurrentLine));
-                }
+              }
+  
+              this.WorkToken();
+  
+              this.token = Text.substr(this.cIndex, Operator.length);
+              this.WorkToken();
+  
+              this.cIndex += Operator.length;
+              this.IsOperator = true;
+              break;
             }
-
+  
+  
+          }
         }
+  
+        if (this.IsOperator === false) {
+          c = Text.substr(this.cIndex, 1);
+    
+          if (STRING_LITERAL.includes(c)) {
+            this.WorkToken(this.InString);
+            this.InString = !this.InString;
+          } else {
+            this.token += c;
+          }
+    
+          this.cIndex += 1;
+        }
+      }
+      this.PostLex()
+    }
+  
+    PostLex() {
+      var token;
+      for (var i = 0; i < this.TokenList.length; i++) {
+        token = this.TokenList[i];
+  
+        switch (token.Type) {
+          case Type.WORD_LITERAL:
+            token.Value = token.Value.trim();
+            break;
+        }
+      }
+    }
+  
+    /**
+     * 
+     * @param {number} Direction 
+     * @param {CoolexToken} NewPiece 
+     */
+    AddLastToken(Direction, NewPiece) {
+      var res = this.TokenList;
+  
+      this.BlockIndex += Direction;
+  
+      if (NewPiece !== undefined) {
+        for (var levels = 0; levels < this.BlockIndex; levels++) {
+          if (res.length > 0) {
+            if (res[res.length - 1].Block == null) {
+              res[res.length - 1].Block = [];
+            }
+  
+            res = res[res.length - 1].Block;
+          }
+        }
+  
+        res.push(NewPiece);
+      }
+  
+    }
+  
+    /**
+     * 
+     * @param {boolean} stringToken 
+     */
+    WorkToken(stringToken = false) {
+      var piece = this.token;
+      this.token = "";
+  
+      if (piece.length > 0) {
+        if (stringToken == false) {
+          for (const Piece in Pieces) {
+            for (var [key, Value] of Object.entries(Pieces[Piece])) {
+              if (Value.length > 1 && Value.startsWith("/") && Value.endsWith("/") && !OPERATORS.includes(piece)) {
+                Value = Value.substring(1, Value.length-1);
+                if (new RegExp(Value).test(piece)) {
+                  this.AddLastToken(0, new CoolexToken(Piece, piece, this.cIndex));
+                  return;
+                }
+              } else {
+                if (Value == piece) {
+                  switch (true) {
+                    case BLOCK_OPEN.includes(piece):
+  				    //--SEPERATE_BLOCK--
+                      this.AddLastToken(1);
+                      break;
+                    case BLOCK_CLOSE.includes(piece):
+                      this.AddLastToken(-1);
+                      break;
+                    default:
+                      this.AddLastToken(0, new CoolexToken(Piece, piece, this.cIndex));
+                  }
+                  return;
+                }
+              }
+            }
+          }
+        } else {
+          this.AddLastToken(0, new CoolexToken(Type.STRING_LITERAL, piece, this.cIndex));
+        }
+      } else {
+        if (stringToken === true) {
+          this.GetLastToken(0, new CoolexToken(Type.STRING_LITERAL, piece, this.cIndex));
+        }
+      }
+    }
+  
+    static PrintNormal(blocks, indent) {
+      for (const block of blocks) {
+        if (block.Type == Type.BLOCK) {
+          this.PrintNormal(block.Block, indent+1);
+        } else {
+          console.log("  ".repeat(indent * 2) + block.Value);
+        }
+      }
+    }
+  
+    static IsNumber(value) {
+      return new RegExp("^[0-9]*$").test(value);
+    }
+  }

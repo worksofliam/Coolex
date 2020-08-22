@@ -1,26 +1,22 @@
-﻿    class CoolexType
-    {
-        public List<CoolexType> Block;
-        public CoolexLex.Type Type;
-        public string Value;
-		public int Line;
+﻿class CoolexToken {
+  /**
+   * 
+   * @param {Type} type 
+   * @param {string} value 
+   * @param {number} index 
+   */
+  constructor(type, value, index) {
+    this.Type = Number(type);
+    this.Value = value;
+    this.Index = index;
+    this.Block = null;
+  }
+}
 
-        public CoolexType(CoolexLex.Type type, string value, int line)
-        {
-            Type = type;
-            Value = value;
-			Line = line;
-            Block = null;
-        }
-    }
-
-	class ParseError 
-	{
-		public int Line;
-		public string Text;
-
-		public ParseError(int line, string text) {
-		  this.Line = line;
-		  this.Text = text;
-		}
+class ParseError 
+{
+	constructor(index, text) {
+		this.Index = index;
+		this.Text = text;
 	}
+}
